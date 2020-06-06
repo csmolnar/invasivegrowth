@@ -48,14 +48,15 @@ for i=1:length(afterImagesList)
     fprintf('[%02d/%02d] Processing image pair (%s,%s)\n', i, length(afterImagesList), beforeImagesList(i).name, afterImagesList(i).name);
     
     if strcmp(options.imagingType, 'top')
-        [mbs{i}, mas{i}, ~, plateMask, segm] = processImagePairTop(registeredImages{i,1}, registeredImages{i,2}, masks{i});
+        [mbs{i}, mas{i}, f, plateMask, segm] = processImagePairTop(registeredImages{i,1}, registeredImages{i,2}, masks{i});
     else
-        [mbs{i}, mas{i}, ~, plateMask, segm] = processImagePairBottom(registeredImages{i,1}, registeredImages{i,2}, masks{i});
+        [mbs{i}, mas{i}, f, plateMask, segm] = processImagePairBottom(registeredImages{i,1}, registeredImages{i,2}, masks{i});
     end
     
     if options.saveSegmentations == 1
-        imwrite(plateMask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
+%         imwrite(plateMask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
         imwrite(segm, fullfile(options.resultsDir, sprintf('segm_%s', beforeImagesList(i).name)));
+        imwrite(getimage(f), fullfile(options.resultsDir, sprintf('cont_%s', beforeImagesList(i).name)));
     end
     
 end

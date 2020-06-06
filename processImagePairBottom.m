@@ -117,8 +117,8 @@ medianSize = median(areas(2:end));
 areaMap = areas(bwlabel(closedPlate)+1);
 % figure; imagesc(areaMap);
 
-areaMap(areaMap>2.5*medianSize) = 0;
-areaMap(areaMap<0.5*medianSize) = 0;
+areaMap(areaMap>4*medianSize) = 0;
+areaMap(areaMap<0.25*medianSize) = 0;
 % figure; imagesc(areaMap);
 
 %%
@@ -145,14 +145,10 @@ centroids = cat(1, p.Centroid);
 xLocations = centroids(:,1);
 yLocations = centroids(:,2);
 
-centersXstart = linspace(min(xLocations), max(xLocations), 12);
-centersYstart = linspace(min(yLocations), max(yLocations), 8);
-
-[~, centersX] = kmeans(xLocations, 12, 'start', [centersXstart'], 'replicates', 1);
+[~, centersX] = kmeans(xLocations, 12, 'replicates', 5);
 centersX = ceil(sort(centersX));
-[~, centersY] = kmeans(yLocations, 8, 'start', [centersYstart'], 'replicates', 1);
+[~, centersY] = kmeans(yLocations, 8, 'replicates', 5);
 centersY = ceil(sort(centersY));
-    
 distX = ceil(mean( diff(centersX) ));
 distY = ceil(mean( diff(centersY) ));
 
@@ -249,10 +245,11 @@ end
 if options.popupResults
     outlinedImage = plateImage;
     perim = bwperim(segmentation);
+    perim = imdilate(perim, strel('disk', 1));
     outlinedImage(perim) = 255;
     outImage(:,:,2) = outlinedImage;
     outlinedImage(perim) = 0;
     outImage(:,:,1) = outlinedImage;
     outImage(:,:,3) = outlinedImage;
-    figure(3); imshow(outImage);
+    f = figure(3); imshow(outImage);
 end

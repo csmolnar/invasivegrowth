@@ -14,6 +14,7 @@ end
 for i = 1:length(plateList)
     
     options.plateName = plateList(i).name;
+    close all;
     processPlateMainScript;
     
 end
