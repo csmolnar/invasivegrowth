@@ -42,7 +42,7 @@ if ~isempty(indexPairs)
         figure(1); clf;
         subplot(1,3,1, 'replace');
         showMatchedFeatures(imgBefore(:,:,1),imgAfter(:,:,1),matchedOriginal,matchedDistorted);
-        title('Putatively matched points (including outliers)');
+        title({'Putatively matched points', '(including outliers)'});
         legend('ptsOriginal','ptsDistorted');
     end
         
