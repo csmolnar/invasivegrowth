@@ -16,7 +16,7 @@ bw1_filled = imfill(bw1, 'holes');
 bw2_filled = imfill(bw2, 'holes');
 
 LRout1=LargestRectangle(bw1_filled,0,0,0,0,0);
-LRout2=LargestRectangle(bw1_filled,0,0,0,0,0);
+LRout2=LargestRectangle(bw2_filled,0,0,0,0,0);
 
 bbox = [ min([LRout1(2:end, 1); LRout2(2:end, 1)]),...
          min([LRout1(2:end, 2); LRout2(2:end, 2)]),...
