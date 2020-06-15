@@ -1,4 +1,4 @@
-function [measurements, measurementsAfter, outImage, segmentation] = processImagePairBottom(imBefore, imAfter, plateMask)
+function [measurementsBefore, measurementsAfter, outImage, segmentation] = processImagePairBottom(imBefore, imAfter, plateMask)
 
 global options;
 
@@ -11,7 +11,7 @@ plateProps = regionprops(plateMask, 'BoundingBox');
 bbox = cat(1, plateProps.BoundingBox);
 bbox(bbox<1) = 1;
 
-plateImage = im(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
+plateImageBefore = im(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
                 floor(plateProps(1).BoundingBox(1)): floor(plateProps(1).BoundingBox(1))+plateProps(1).BoundingBox(3));
             
 plateImageAfter = imAfter(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
@@ -19,8 +19,8 @@ plateImageAfter = imAfter(floor(plateProps(1).BoundingBox(2)): floor(plateProps(
 
 %%
 
-tplate = adaptthresh(plateImage, 0.5, 'Statistic', 'mean');
-BW = imbinarize(plateImage,tplate);
+tplate = adaptthresh(plateImageBefore, 0.5, 'Statistic', 'mean');
+BW = imbinarize(plateImageBefore,tplate);
 
 %% finding centroids with thresholding and filtering
 
@@ -68,10 +68,10 @@ if options.popupResults
     figure(10); imshow(im); hold on;
 end
 
-measurements = cell(12,8);
+measurementsBefore = cell(12,8);
 measurementsAfter = cell(12,8);
 
-[h, w, ~] = size(plateImage);
+[h, w, ~] = size(plateImageBefore);
 segmentation = zeros(h,w);
 
 for i=1:12
@@ -85,17 +85,16 @@ for i=1:12
         
         %%% segmentation v1 (thresholding)
 
-        top = int16(max(1, centersY(j)-distY/2));
-        bottom = int16(min( h, centersY(j)+distY/2));
-        left = int16(max(1, centersX(i)-distX/2));
-        right = int16(min( w, centersX(i)+distX/2));
+        top    = int16(max(1, centersY(j)-distY/2));
+        bottom = int16(min(h, centersY(j)+distY/2));
+        left   = int16(max(1, centersX(i)-distX/2));
+        right  = int16(min(w, centersX(i)+distX/2));
         
-        colonyPatch = plateImage(top:bottom, left:right);
-        colonyPatchAfter = plateImageAfter(top:bottom, left:right);
+        colonyPatchBefore = plateImageBefore(top:bottom, left:right);
+        colonyPatchAfter  = plateImageAfter(top:bottom, left:right);
 
-        t = graythresh(colonyPatch);
-        segm = imbinarize(colonyPatch, t);
-        
+        t = graythresh(colonyPatchBefore);
+        segm = imbinarize(colonyPatchBefore, t);
         segm = imfill(segm, 'holes');
         
         L = bwlabel(segm);
@@ -112,23 +111,22 @@ for i=1:12
             segm = L == maxRegionId;
         end
         
-        segmentation(top:bottom, left:right) = segm;
         %%% update main segmentation image and measure colony
         
         segmentation(top:bottom, left:right) = segm;
         
-        meanColonyIntensity = mean( colonyPatch(segm) );
-        meanBgIntensity = mean( colonyPatch(~segm) );
+        meanColonyIntensityBefore = mean( colonyPatchBefore( segm) );
+        meanBgIntensityBefore     = mean( colonyPatchBefore(~segm) );
                 
-        meanColonyIntensityAfter = mean( colonyPatchAfter(segm) );
-        meanBgIntensityAfter = mean( colonyPatchAfter(~segm) );
+        meanColonyIntensityAfter  = mean( colonyPatchAfter( segm) );
+        meanBgIntensityAfter      = mean( colonyPatchAfter(~segm) );
         
-        measurements{i,j} = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensity, 'meanBgIntensity', meanBgIntensity);
-        measurementsAfter{i,j} = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensityAfter, 'meanBgIntensity', meanBgIntensityAfter);
+        measurementsBefore{i,j}   = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensityBefore, 'meanBgIntensity', meanBgIntensityBefore);
+        measurementsAfter{i,j}    = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensityAfter, 'meanBgIntensity', meanBgIntensityAfter);
     end
 end
 
-outlinedImage = plateImage;
+outlinedImage = plateImageBefore;
 perim = bwperim(segmentation);
 perim = imdilate(perim, strel('disk', 1));
 outlinedImage(perim) = 255;
