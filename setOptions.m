@@ -13,6 +13,7 @@ options.afterRegexp = '*after*.JPG';
 
 options.popupResults = 0;
 options.saveSegmentations = 1; % TODO: change results format
+options.storeResults = 0;
 
 options.outputFileName = sprintf('results_%s_%s.csv', options.plateName, options.imagingType);
 

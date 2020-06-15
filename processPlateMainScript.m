@@ -11,8 +11,10 @@ setOptions(scriptDir);
 beforeImagesList = dir(fullfile(options.dataDir, options.beforeRegexp));
 afterImagesList = dir(fullfile(options.dataDir, options.afterRegexp));
 
-registeredImages = cell(length(afterImagesList),2);
-masks = cell(length(afterImagesList),1);
+if options.storeResults == 1
+    registeredImages = cell(length(afterImagesList),2);
+    masks = cell(length(afterImagesList),1);
+end
 
 mbs = cell(length(afterImagesList));
 mas = cell(length(afterImagesList));
@@ -27,30 +29,34 @@ for i=1:length(afterImagesList)
     
     % rotation with 180 degrees
     imgBefore = imrotate(imread( fullfile(options.dataDir, beforeImagesList(i).name) ), 180 );
-    imgAfter = imrotate(imread( fullfile(options.dataDir, afterImagesList(i).name) ), 180 );
+    imgAfter  = imrotate(imread( fullfile(options.dataDir, afterImagesList(i).name) ), 180 );
+    
+    % detection of plate area
+    mask = segmentPlateArea(imgBefore, imgAfter);
     
     % image registration registration
-    [registeredImages{i,1}, registeredImages{i,2}, masks{i}] = registerImages(imgBefore, imgAfter);
+    [registeredImageBefore, registeredImageAfter] = registerImages(imgBefore, imgAfter, mask);
 
     fprintf('|-[2] Segmentation and feature extraction\n');
     
-    if strcmp(options.imagingType, 'top')
-        [mbs{i}, mas{i}, f, plateMask, segm] = processImagePairTop(registeredImages{i,1}, registeredImages{i,2}, masks{i});
-    else
-        [mbs{i}, mas{i}, f, plateMask, segm] = processImagePairBottom(registeredImages{i,1}, registeredImages{i,2}, masks{i});
-    end
-    
+    [mbs{i}, mas{i}, outlinedImage, colonySegmentation] = processImagePairBottom(registeredImageBefore, registeredImageAfter, mask);
+        
     fprintf('|-[3] Saving image results\n');
     
+    if options.storeResults == 1
+        masks{i} = mask;
+        registeredImages{i,1} = imgBefore;
+        registeredImages{i,2} = registeredImageAfter;
+    end
+    
     if options.saveSegmentations == 1
-        
         h = figure('Visible','off');
-        imshowpair(registeredImages{i,1}, registeredImages{i,2}, 'Scaling', 'joint');
+        imshowpair(imgBefore, registeredImageAfter, 'Scaling', 'joint');
         imwrite(getimage(h), fullfile(options.resultsDir, ['registration_' beforeImagesList(i).name '.png']));
         
-%         imwrite(plateMask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
-        imwrite(segm, fullfile(options.resultsDir, sprintf('segm_%s', beforeImagesList(i).name)));
-        imwrite(getimage(f), fullfile(options.resultsDir, sprintf('cont_%s', beforeImagesList(i).name)));
+%         imwrite(mask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
+        imwrite(colonySegmentation, fullfile(options.resultsDir, sprintf('segm_%s', beforeImagesList(i).name)));
+        imwrite(outlinedImage, fullfile(options.resultsDir, sprintf('cont_%s', beforeImagesList(i).name)));
     end
     
 end

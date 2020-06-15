@@ -1,11 +1,11 @@
-function [measurements, measurementsAfter, f, plateMask, segmentation] = processImagePairBottom(imBefore, imAfter, mask1)
+function [measurements, measurementsAfter, outImage, segmentation] = processImagePairBottom(imBefore, imAfter, plateMask)
 
 global options;
 
 im = 2^8 - imBefore;
 imAfter = 2^8 - imAfter;
 
-plateMask = mask1(:,:,1) > 0;
+plateMask = plateMask(:,:,1) > 0;
 
 plateProps = regionprops(plateMask, 'BoundingBox');
 bbox = cat(1, plateProps.BoundingBox);
@@ -16,7 +16,6 @@ plateImage = im(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).Boundin
             
 plateImageAfter = imAfter(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
                 floor(plateProps(1).BoundingBox(1)): floor(plateProps(1).BoundingBox(1))+plateProps(1).BoundingBox(3));
-
 
 %%
 
@@ -83,7 +82,9 @@ for i=1:12
         if options.popupResults
             figure(10); text(bbox(1)+centersX(i),bbox(2)+centersY(j), wellCode);
         end
-            
+        
+        %%% segmentation v1 (thresholding)
+
         top = int16(max(1, centersY(j)-distY/2));
         bottom = int16(min( h, centersY(j)+distY/2));
         left = int16(max(1, centersX(i)-distX/2));
@@ -112,7 +113,9 @@ for i=1:12
         end
         
         segmentation(top:bottom, left:right) = segm;
+        %%% update main segmentation image and measure colony
         
+        segmentation(top:bottom, left:right) = segm;
         
         meanColonyIntensity = mean( colonyPatch(segm) );
         meanBgIntensity = mean( colonyPatch(~segm) );
@@ -125,18 +128,16 @@ for i=1:12
     end
 end
 
+outlinedImage = plateImage;
+perim = bwperim(segmentation);
+perim = imdilate(perim, strel('disk', 1));
+outlinedImage(perim) = 255;
+outImage(:,:,2) = outlinedImage;
+outlinedImage(perim) = 0;
+outImage(:,:,1) = outlinedImage;
+outImage(:,:,3) = outlinedImage;
+
 if options.popupResults
-    outlinedImage = plateImage;
-    perim = bwperim(segmentation);
-    perim = imdilate(perim, strel('disk', 1));
-    outlinedImage(perim) = 255;
-    outImage(:,:,2) = outlinedImage;
-    outlinedImage(perim) = 0;
-    outImage(:,:,1) = outlinedImage;
-    outImage(:,:,3) = outlinedImage;
-    f = figure(3); imshow(outImage);
-else
-    f =[];
+    figure(3); imshow(outImage);
 end
 
-end

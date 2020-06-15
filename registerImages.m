@@ -1,29 +1,9 @@
-function [imgBefore, imgAfterRegistered, mask] = registerImages(inputImgBefore, inputImgAfter)
+function [imgBefore, imgAfterRegistered] = registerImages(inputImgBefore, inputImgAfter, mask)
 
 global options;
 
 imgBefore = rgb2gray(inputImgBefore);
 imgAfter = rgb2gray(inputImgAfter);
-
-%%% Extract plate regions
-
-gl1 = graythresh(imgBefore);
-bw1 = im2bw(imgBefore, gl1);
-gl2 = graythresh(imgAfter);
-bw2 = im2bw(imgBefore, gl2);
-
-bw1_filled = imfill(bw1, 'holes');
-bw2_filled = imfill(bw2, 'holes');
-
-LRout1=LargestRectangle(bw1_filled,0,0,0,0,0);
-LRout2=LargestRectangle(bw2_filled,0,0,0,0,0);
-
-bbox = [ min([LRout1(2:end, 1); LRout2(2:end, 1)]),...
-         min([LRout1(2:end, 2); LRout2(2:end, 2)]),...
-         max([LRout1(2:end, 1); LRout2(2:end, 1)]),...
-         max([LRout1(2:end, 2); LRout2(2:end, 2)])];
-mask = uint8(zeros(size(imgBefore)));
-mask(bbox(2):bbox(4), bbox(1):bbox(3)) = 1;
 
 ptsOriginal  = detectSURFFeatures(imgBefore(:,:,1).*mask, 'MetricThreshold', 100);
 ptsDistorted = detectSURFFeatures(imgAfter(:,:,1).*mask, 'MetricThreshold', 100);
