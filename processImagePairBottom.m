@@ -2,8 +2,8 @@ function [measurementsBefore, measurementsAfter, outImage, segmentation] = proce
 
 global options;
 
-im = 2^8 - imBefore;
-imAfter = 2^8 - imAfter;
+imBefore = 2^8 - imBefore;
+imAfter  = 2^8 - imAfter;
 
 plateMask = plateMask(:,:,1) > 0;
 
@@ -11,7 +11,7 @@ plateProps = regionprops(plateMask, 'BoundingBox');
 bbox = cat(1, plateProps.BoundingBox);
 bbox(bbox<1) = 1;
 
-plateImageBefore = im(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
+plateImageBefore = imBefore(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
                 floor(plateProps(1).BoundingBox(1)): floor(plateProps(1).BoundingBox(1))+plateProps(1).BoundingBox(3));
             
 plateImageAfter = imAfter(floor(plateProps(1).BoundingBox(2)): floor(plateProps(1).BoundingBox(2))+plateProps(1).BoundingBox(4),...
@@ -65,7 +65,7 @@ distY = ceil(mean( diff(centersY) ));
 %% extract colonies at grid point (wells) positions
 
 if options.popupResults
-    figure(10); imshow(im); hold on;
+    figure(10); imshow(imBefore); hold on;
 end
 
 measurementsBefore = cell(12,8);
