@@ -85,10 +85,10 @@ for i=1:12
         
         %%% segmentation v1 (thresholding)
 
-        top    = int16(max(1, centersY(j)-distY/2));
-        bottom = int16(min(h, centersY(j)+distY/2));
-        left   = int16(max(1, centersX(i)-distX/2));
-        right  = int16(min(w, centersX(i)+distX/2));
+        top    = int16(max(1, centersY(j)-distY));
+        bottom = int16(min(h, centersY(j)+distY));
+        left   = int16(max(1, centersX(i)-distX));
+        right  = int16(min(w, centersX(i)+distX));
         
         colonyPatchBefore = plateImageBefore(top:bottom, left:right);
         colonyPatchAfter  = plateImageAfter(top:bottom, left:right);
@@ -96,30 +96,37 @@ for i=1:12
         t = graythresh(colonyPatchBefore);
         segm = imbinarize(colonyPatchBefore, t);
         segm = imfill(segm, 'holes');
+        segm = imopen(segm, strel('disk', 10));
         
         L = bwlabel(segm);
-        props = regionprops(L, 'Area', 'Eccentricity');
-        [~, maxRegionId] = max( cat(1,props.Area) );
+        props = regionprops(L, 'Eccentricity');        
+        objectRegionId = L(distY, distX);
         
-        if props(maxRegionId).Eccentricity>0.6
+        if objectRegionId==0 || props(objectRegionId).Eccentricity>0.6
             [hh,ww] = size(L);
             xs = 1:ww;
             ys = 1:hh;
             [XS,YS] = meshgrid(xs,ys);
-            segm = (XS-distX/2).^2+(YS-distY/2).^2<50^2;
+            segm = (XS-distX).^2+(YS-distY).^2<=50^2;
         else
-            segm = L == maxRegionId;
+            segm = L == objectRegionId;
         end
+        
+        propsBoundingBox = regionprops(segm, 'BoundingBox');
+        bgMask = zeros(size(segm,1),size(segm,2),'logical');
+        bgMask(int32(propsBoundingBox(1).BoundingBox(2)):int32(propsBoundingBox(1).BoundingBox(2))+propsBoundingBox(1).BoundingBox(4)-1,...
+               int32(propsBoundingBox(1).BoundingBox(1)):int32(propsBoundingBox(1).BoundingBox(1))+propsBoundingBox(1).BoundingBox(3)-1) = 1;
+        bgMask(segm) = 0;
         
         %%% update main segmentation image and measure colony
         
-        segmentation(top:bottom, left:right) = segm;
+        segmentation(top:bottom, left:right) = segmentation(top:bottom, left:right) | segm;
         
-        meanColonyIntensityBefore = mean( colonyPatchBefore( segm) );
-        meanBgIntensityBefore     = mean( colonyPatchBefore(~segm) );
+        meanColonyIntensityBefore = mean( colonyPatchBefore(segm) );
+        meanBgIntensityBefore     = mean( colonyPatchBefore(bgMask) );
                 
-        meanColonyIntensityAfter  = mean( colonyPatchAfter( segm) );
-        meanBgIntensityAfter      = mean( colonyPatchAfter(~segm) );
+        meanColonyIntensityAfter  = mean( colonyPatchAfter(segm) );
+        meanBgIntensityAfter      = mean( colonyPatchAfter(bgMask) );
         
         measurementsBefore{i,j}   = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensityBefore, 'meanBgIntensity', meanBgIntensityBefore);
         measurementsAfter{i,j}    = struct('well', wellCode, 'meanColonyIntensity', meanColonyIntensityAfter, 'meanBgIntensity', meanBgIntensityAfter);
