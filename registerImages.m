@@ -1,12 +1,12 @@
-function [imgBefore, imgAfterRegistered] = registerImages(inputImgBefore, inputImgAfter, mask)
+function [imgBefore, imgAfterRegistered] = registerImages(inputImgBefore, inputImgAfter)
 
 global options;
 
 imgBefore = rgb2gray(inputImgBefore);
 imgAfter = rgb2gray(inputImgAfter);
 
-ptsOriginal  = detectSURFFeatures(imgBefore(:,:,1).*mask, 'MetricThreshold', 100);
-ptsDistorted = detectSURFFeatures(imgAfter(:,:,1).*mask, 'MetricThreshold', 100);
+ptsOriginal  = detectSURFFeatures(imgBefore(:,:,1), 'MetricThreshold', 100);
+ptsDistorted = detectSURFFeatures(imgAfter(:,:,1), 'MetricThreshold', 100);
 
 [featuresOriginal,  validPtsOriginal]  = extractFeatures(imgBefore(:,:,1),  ptsOriginal);
 [featuresDistorted, validPtsDistorted] = extractFeatures(imgAfter(:,:,1), ptsDistorted);

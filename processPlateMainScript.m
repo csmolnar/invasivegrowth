@@ -1,5 +1,6 @@
 % close all;
 % clear;
+warning('off','all');
 
 [scriptDir, ~] = fileparts( mfilename('fullpath') );
 
@@ -32,10 +33,11 @@ for i=1:length(afterImagesList)
     imgAfter  = imrotate(imread( fullfile(options.dataDir, afterImagesList(i).name) ), 180 );
     
     % detection of plate area
-    mask = segmentPlateArea(imgBefore, imgAfter);
+    maskBefore = segmentPlateArea(imgBefore);
+    maskAfter = segmentPlateArea(imgAfter);
     
     % image registration registration
-    [registeredImageBefore, registeredImageAfter] = registerImages(imgBefore, imgAfter, mask);
+    [registeredImageBefore, registeredImageAfter] = registerImages(imgBefore.*maskBefore, imgAfter.*maskAfter);
 
     fprintf('|-[2] Segmentation and feature extraction\n');
     
@@ -99,3 +101,5 @@ t = table(FileName, Well, MeanIntensityBefore, MeanBgIntensityBefore, MeanIntens
 writetable(t, fullfile(options.resultsDir, options.outputFileName));
 
 fprintf('Saving results to file %s finished.\n', fullfile(options.resultsDir, options.outputFileName));
+
+warning('on','all');
