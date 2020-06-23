@@ -41,7 +41,7 @@ for i=1:length(afterImagesList)
 
     fprintf('|-[2] Segmentation and feature extraction\n');
     
-    [mbs{i}, mas{i}, outlinedImage, colonySegmentation] = processImagePairBottom(registeredImageBefore, registeredImageAfter, mask);
+    [mbs{i}, mas{i}, outlinedImage, colonySegmentation] = processImagePairBottom(registeredImageBefore, registeredImageAfter, maskBefore);
         
     fprintf('|-[3] Saving image results\n');
     
