@@ -24,6 +24,8 @@ mas = cell(length(afterImagesList));
 fprintf(sprintf('Processing of images started.\n'));
 for i=1:length(afterImagesList)
     
+    [~, baseName, ext] = fileparts(beforeImagesList(i).name);
+    
     fprintf('[%02d/%02d] Processing image pair (%s,%s)\n', i, length(afterImagesList), beforeImagesList(i).name, afterImagesList(i).name);
     
     fprintf('|-[1] Registration of images\n');
@@ -41,8 +43,8 @@ for i=1:length(afterImagesList)
 
     fprintf('|-[2] Segmentation and feature extraction\n');
     
-    [mbs{i}, mas{i}, outlinedImage, colonySegmentation] = processImagePairBottom(registeredImageBefore, registeredImageAfter, maskBefore);
-        
+    [mbs{i}, mas{i}, outlinedImageBefore, outlinedImageAfter, colonySegmentation] = processImagePairBottom(registeredImageBefore, registeredImageAfter, maskBefore);    
+    
     fprintf('|-[3] Saving image results\n');
     
     if options.storeResults == 1
@@ -58,7 +60,8 @@ for i=1:length(afterImagesList)
         
 %         imwrite(mask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
         imwrite(colonySegmentation, fullfile(options.resultsDir, sprintf('segm_%s', beforeImagesList(i).name)));
-        imwrite(outlinedImage, fullfile(options.resultsDir, sprintf('cont_%s', beforeImagesList(i).name)));
+        imwrite(outlinedImageBefore, fullfile(options.resultsDir, sprintf('cont_%s_01_before.png', baseName)));
+        imwrite(outlinedImageAfter, fullfile(options.resultsDir, sprintf('cont_%s_02_after.png', baseName)));
     end
     
 end

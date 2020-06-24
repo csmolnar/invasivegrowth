@@ -1,4 +1,4 @@
-function [measurementsBefore, measurementsAfter, outImage, segmentation] = processImagePairBottom(imBefore, imAfter, plateMask)
+function [measurementsBefore, measurementsAfter, outImageBefore, outImageAfter, segmentation] = processImagePairBottom(imBefore, imAfter, plateMask)
 
 global options;
 
@@ -137,12 +137,19 @@ outlinedImage = plateImageBefore;
 perim = bwperim(segmentation);
 perim = imdilate(perim, strel('disk', 1));
 outlinedImage(perim) = 255;
-outImage(:,:,2) = outlinedImage;
+outImageBefore(:,:,2) = outlinedImage;
 outlinedImage(perim) = 0;
-outImage(:,:,1) = outlinedImage;
-outImage(:,:,3) = outlinedImage;
+outImageBefore(:,:,1) = outlinedImage;
+outImageBefore(:,:,3) = outlinedImage;
+
+outlinedImage = plateImageAfter;
+outlinedImage(perim) = 255;
+outImageAfter(:,:,2) = outlinedImage;
+outlinedImage(perim) = 0;
+outImageAfter(:,:,1) = outlinedImage;
+outImageAfter(:,:,3) = outlinedImage;
 
 if options.popupResults
-    figure(3); imshow(outImage);
+    figure(3); imshow(outImageBefore);
 end
 
