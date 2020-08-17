@@ -13,6 +13,11 @@ threshold = graythresh(plateImage);
 BW = im2bw(plateImage, threshold);
 BW = imfill(BW, 'holes');
 
+BW(:,1) = 0;
+BW(:,end) = 0;
+BW(1,:) = 0;
+BW(end,:) = 0;
+
 % fit largest embedded rectangle in both images
 LRout=LargestRectangle(BW,0,0,0,0,0);
 
