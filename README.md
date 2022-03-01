@@ -13,7 +13,7 @@ The code is working with the following folder structure (NOTE: ```results``` fol
 /<Project directory>/ # options.projectDir
     ├── data
     |       ├── <Plate 1> # options.plateName
-    |       |       └── bottom # options.imagingType
+    |       |       └── <Imaging type> # options.imagingType, default is bottom
     |       |              ├── <pre-wash image 1> # options.beforeRegexp
     |       |              ├── <post-wash image 1> # options.afterRegexp
     |       |              ├── <pre-wash image 2>
@@ -24,10 +24,15 @@ The code is working with the following folder structure (NOTE: ```results``` fol
     |       └── ...
     └── results
             ├── <Plate 1> # options.plateName
+            |       ├── results_<Plate 1>_<Imaging type>.csv
+            |       ├── <Segmentation result 1>
+            |       ├── <Segmentation result 2>
+            |       └── ...
+            |       
             ├── <Plate 2> 
             └── ...
 ```
 
 ## Running image analysis
 
-The analysis can be performed for a single plate by running script ```processPlateMainScript.m```.
+The analysis can be performed for a single plate by running script ```processPlateMainScript.m```. The measured values will be saved under ```results``` directory.
