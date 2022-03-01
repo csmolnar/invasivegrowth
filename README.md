@@ -10,26 +10,26 @@ The path to images can be set in ```setOptions.m```.
 The code is working with the following folder structure (NOTE: ```results``` folder is automatically created by the code):
 
 ```
-/<Project directory>/ # options.projectDir
+/<project directory>/ # options.projectDir
     ├── data
-    |       ├── <Plate 1> # options.plateName
-    |       |       └── <Imaging type> # options.imagingType, default is bottom
+    |       ├── <plate 1> # options.plateName
+    |       |       └── <imaging type> # options.imagingType, default is bottom
     |       |              ├── <pre-wash image 1> # options.beforeRegexp
     |       |              ├── <post-wash image 1> # options.afterRegexp
     |       |              ├── <pre-wash image 2>
     |       |              ├── <post-wash image 2>
     |       |              └── ...
-    |       ├── <Plate 2> 
+    |       ├── <plate 2> 
     |       |        └── ...
     |       └── ...
     └── results
-            ├── <Plate 1> # options.plateName
-            |       ├── results_<Plate 1>_<Imaging type>.csv
-            |       ├── <Segmentation result 1>
-            |       ├── <Segmentation result 2>
+            ├── <plate 1> # options.plateName
+            |       ├── results_<plate 1>_<imaging type>.csv
+            |       ├── <segmentation result 1>
+            |       ├── <segmentation result 2>
             |       └── ...
             |       
-            ├── <Plate 2> 
+            ├── <plate 2> 
             └── ...
 ```
 
