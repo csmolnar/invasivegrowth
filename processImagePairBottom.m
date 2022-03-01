@@ -2,8 +2,10 @@ function [measurementsBefore, measurementsAfter, outImageBefore, outImageAfter, 
 
 global options;
 
-imBefore = 2^8 - imBefore;
-imAfter  = 2^8 - imAfter;
+% invert images
+
+imBefore = imcomplement(imBefore);
+imAfter  = imcomplement(imAfter);
 
 plateMask = plateMask(:,:,1) > 0;
 
