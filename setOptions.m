@@ -2,15 +2,16 @@ function setOptions(scriptDir)
 
 global options;
 
-options.plateName         = '20191002_RolandTAVI_YPD_R1_original';
+options.plateName         = '20220703_NAT1011INV-pilot';
 options.imagingType       = 'bottom';
+options.plateType         = 384;
 
 options.beforeRegexp      = '*before*.JPG';
 options.afterRegexp       = '*after*.JPG';
 
 options.popupResults      = 1;
 options.saveSegmentations = 1;
-options.storeResults      = 0;
+options.storeResults      = 1;
 
 options.outputFileName    = sprintf('results_%s_%s.csv', options.plateName, options.imagingType);
 

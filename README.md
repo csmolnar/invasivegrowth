@@ -12,19 +12,19 @@ The code is working with the following folder structure (NOTE: ```results``` fol
 ```
 /<project directory>/ # options.projectDir
     ├── data
-    |       ├── <plate 1> # options.plateName
+    |       ├── <experiment 1> # options.plateName
     |       |       └── <imaging type> # options.imagingType, default is bottom
     |       |              ├── <pre-wash image 1> # options.beforeRegexp
     |       |              ├── <post-wash image 1> # options.afterRegexp
     |       |              ├── <pre-wash image 2>
     |       |              ├── <post-wash image 2>
     |       |              └── ...
-    |       ├── <plate 2> 
+    |       ├── <experiment 2> 
     |       |        └── ...
     |       └── ...
     └── results
-            ├── <plate 1> # options.plateName
-            |       ├── results_<plate 1>_<imaging type>.csv
+            ├── <experiment 1> # options.plateName
+            |       ├── results_<experiment 1>_<imaging type>.csv
             |       ├── <segmentation result 1>
             |       ├── <segmentation result 2>
             |       └── ...

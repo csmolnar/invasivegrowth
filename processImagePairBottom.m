@@ -2,6 +2,14 @@ function [measurementsBefore, measurementsAfter, outImageBefore, outImageAfter, 
 
 global options;
 
+if options.plateType == 384
+    rowNum = 16;
+    colNum = 24;
+else
+    rowNum = 8;
+    colNum = 12;
+end
+
 % invert images
 
 imBefore = imcomplement(imBefore);
@@ -24,42 +32,52 @@ plateImageAfter = imAfter(floor(plateProps(1).BoundingBox(2)): floor(plateProps(
 tplate = adaptthresh(plateImageBefore, 0.5, 'Statistic', 'mean');
 BW = imbinarize(plateImageBefore,tplate);
 
-%% finding centroids with thresholding and filtering
+if options.plateType == 384
 
-med = medfilt2(BW, [30 30]);
+    [h,w] = size(BW);
+    circleSizeEstimateX = w/colNum;
+    [centroids, RADII, METRIC] = imfindcircles(BW, int16([circleSizeEstimateX/3 circleSizeEstimateX*2]));
+    
+else
 
-closedPlate = imclose(med, strel('disk', 5, 4));
+    %% finding centroids with thresholding and filtering
 
-p = regionprops(closedPlate, 'Area');
-areas = [0; cat(1, p.Area)];
+    med = medfilt2(BW, [30 30]);
 
-medianSize = median(areas(2:end));
+    closedPlate = imclose(med, strel('disk', 5, 4));
 
-areaMap = areas(bwlabel(closedPlate)+1);
+    p = regionprops(closedPlate, 'Area');
+    areas = [0; cat(1, p.Area)];
 
-areaMap(areaMap>4*medianSize) = 0;
-areaMap(areaMap<0.25*medianSize) = 0;
+    medianSize = median(areas(2:end));
 
-%% 
+    areaMap = areas(bwlabel(closedPlate)+1);
 
-p = regionprops(areaMap>0, 'Eccentricity');
+    areaMap(areaMap>4*medianSize) = 0;
+    areaMap(areaMap<0.25*medianSize) = 0;
 
-eccs = [0; cat(1, p.Eccentricity)];
-eccentMap = eccs(bwlabel(areaMap>0)+1);
+    %% 
 
-eccentMap(eccentMap>0.6) = 0;
+    p = regionprops(areaMap>0, 'Eccentricity');
 
-p = regionprops(eccentMap>0, 'Centroid');
-centroids = cat(1, p.Centroid);
+    eccs = [0; cat(1, p.Eccentricity)];
+    eccentMap = eccs(bwlabel(areaMap>0)+1);
+
+    eccentMap(eccentMap>0.6) = 0;
+
+    p = regionprops(eccentMap>0, 'Centroid');
+    centroids = cat(1, p.Centroid);
+
+end
 
 %% fit grid to initially found colonies
 
 xLocations = centroids(:,1);
 yLocations = centroids(:,2);
 
-[~, centersX] = kmeans(xLocations, 12, 'replicates', 5);
+[~, centersX] = kmeans(xLocations, colNum, 'replicates', 5);
 centersX = ceil(sort(centersX));
-[~, centersY] = kmeans(yLocations, 8, 'replicates', 5);
+[~, centersY] = kmeans(yLocations, rowNum, 'replicates', 5);
 centersY = ceil(sort(centersY));
 distX = ceil(mean( diff(centersX) ));
 distY = ceil(mean( diff(centersY) ));
@@ -70,14 +88,14 @@ if options.popupResults
     figure(10); imshow(imBefore); hold on;
 end
 
-measurementsBefore = cell(12,8);
-measurementsAfter = cell(12,8);
+measurementsBefore = cell(colNum,rowNum);
+measurementsAfter = cell(colNum,rowNum);
 
 [h, w, ~] = size(plateImageBefore);
 segmentation = zeros(h,w);
 
-for i=1:12
-    for j=1:8
+for i=1:colNum
+    for j=1:rowNum
         
         wellCode = [char('A'+j-1) num2str(i)];
         
@@ -122,7 +140,7 @@ for i=1:12
         
         %%% update main segmentation image and measure colony
         
-        segmentation(top:bottom, left:right) = segmentation(top:bottom, left:right) | segm;
+        segmentation(top:bottom, left:right) = max(segmentation(top:bottom, left:right), (colNum*(i-1)+j)*double(segm));
         
         meanColonyIntensityBefore = mean( colonyPatchBefore(segm) );
         meanBgIntensityBefore     = mean( colonyPatchBefore(bgMask) );
@@ -136,7 +154,7 @@ for i=1:12
 end
 
 outlinedImage = plateImageBefore;
-perim = bwperim(segmentation);
+perim = imdilate(segmentation, strel('disk', 1))~=segmentation;
 perim = imdilate(perim, strel('disk', 1));
 outlinedImage(perim) = 255;
 outImageBefore(:,:,2) = outlinedImage;

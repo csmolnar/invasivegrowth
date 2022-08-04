@@ -48,7 +48,7 @@ for i=1:length(afterImagesList)
     fprintf('|-[3] Saving image results\n');
     
     if options.storeResults == 1
-        masks{i} = mask;
+        masks{i} = colonySegmentation;
         registeredImages{i,1} = imgBefore;
         registeredImages{i,2} = registeredImageAfter;
     end
@@ -58,8 +58,7 @@ for i=1:length(afterImagesList)
         imshowpair(imgBefore, registeredImageAfter, 'Scaling', 'joint');
         imwrite(getimage(h), fullfile(options.resultsDir, ['registration_' beforeImagesList(i).name '.png']));
         
-%         imwrite(mask, fullfile(options.resultsDir, sprintf('mask_%s', beforeImagesList(i).name)));
-        imwrite(colonySegmentation, fullfile(options.resultsDir, sprintf('segm_%s', beforeImagesList(i).name)));
+        imwrite(uint16(colonySegmentation), fullfile(options.resultsDir, sprintf('segm_%s.tiff', baseName)));
         imwrite(outlinedImageBefore, fullfile(options.resultsDir, sprintf('cont_%s_01_before.png', baseName)));
         imwrite(outlinedImageAfter, fullfile(options.resultsDir, sprintf('cont_%s_02_after.png', baseName)));
     end
